@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { useStateContext } from "../context";
 import { CustomButton } from "./";
 import { logo, menu, search, crowdFund } from "../assets";
 import { navLinks } from "../constants";
 
 function Navbar() {
-	// Temporary
-	const address = "0x12j1nn2o123j12nb12k3h13kln1n2k3j12o31l23";
+	// // Temporary
+	// const address = "0x12j1nn2o123j12nb12k3h13kln1n2k3j12o31l23";
 
 	const navigate = useNavigate();
+	const { address, connect } = useStateContext();
 	const [isActive, setIsActive] = useState("dashboard");
 	const [toggleDrawer, setToggleDrawer] = useState(false);
 
@@ -38,7 +40,7 @@ function Navbar() {
 						if (address) {
 							navigate("create-campaign");
 						} else {
-							// connect()
+							connect()
 						}
 					}}
 				/>
@@ -70,7 +72,7 @@ function Navbar() {
 					alt="menu"
 					className="w-[34px] h-[34px] object-contain cursor-pointer"
 					onClick={() => {
-						setToggleDrawer((toggleDrawer)=>!toggleDrawer);
+						setToggleDrawer((toggleDrawer) => !toggleDrawer);
 					}}
 				/>
 
@@ -93,34 +95,44 @@ function Navbar() {
 										navigate(link.link);
 									}}
 								>
-                                    <img
-                                        src={link.imageURL}
-                                        alt={link.name}
-                                        className={`w-[24px] h-[24px] object-contain ${isActive === link.name ? 'grayscale-0' : 'grayscale'}`}
-                                    />
+									<img
+										src={link.imageURL}
+										alt={link.name}
+										className={`w-[24px] h-[24px] object-contain ${
+											isActive === link.name
+												? "grayscale-0"
+												: "grayscale"
+										}`}
+									/>
 
-                                    <p className={`ml-[20px] font-epilogue font-semibold text-[14px] ${isActive === link.name ? 'text-[#1dc071]' : 'text-[#808191]'}`}>
-                                        {link.name}
-                                    </p>
-                                </li>
+									<p
+										className={`ml-[20px] font-epilogue font-semibold text-[14px] ${
+											isActive === link.name
+												? "text-[#1dc071]"
+												: "text-[#808191]"
+										}`}
+									>
+										{link.name}
+									</p>
+								</li>
 							);
 						})}
 					</ul>
 
-                    <div className="flex mx-4 justify-center">
-                        <CustomButton
-                            buttonType="button"
-                            title={address ? 'Create a Campaign' : 'Connect'}
-                            styles={address ? 'bg-[#1dc071]' : 'bg-[#8c6dfd]'}
-                            handleClick={()=>{
-                                if(address){
-                                    navigate('create-campaign')
-                                }else{
-                                    // connect()
-                                }
-                            }}
-                        />
-                    </div>
+					<div className="flex mx-4 justify-center">
+						<CustomButton
+							buttonType="button"
+							title={address ? "Create a Campaign" : "Connect"}
+							styles={address ? "bg-[#1dc071]" : "bg-[#8c6dfd]"}
+							handleClick={() => {
+								if (address) {
+									navigate("create-campaign");
+								} else {
+									connect()
+								}
+							}}
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
