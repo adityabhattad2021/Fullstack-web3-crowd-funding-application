@@ -1,7 +1,11 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/utils/Counters.sol";
+
 contract CrowdFunding {
+    using Counters for Counters.Counter;
+
     struct Campaign {
         address owner;
         string title;
@@ -15,7 +19,7 @@ contract CrowdFunding {
     }
 
     mapping(uint256 => Campaign) public campaigns;
-    uint256 public numberOfCampaigns = 0;
+    Counters.Counter public campaignCounter;
 
     function createCampaigns(
         address _owner,
@@ -29,7 +33,18 @@ contract CrowdFunding {
             _deadline > block.timestamp,
             "The deadline should be a date in the future"
         );
-        Campaign storage campaign = campaigns[numberOfCampaigns];
+        require(
+            bytes(_title).length > 0,
+            "The title must be a non-empty string"
+        );
+        require(
+            bytes(_description).length > 0,
+            "The description must be a non-empty string"
+        );
+        require(_target > 0, "The target must be a positive integer");
+        campaignCounter.increment();
+        uint256 currentCampaignId = campaignCounter.current();
+        Campaign storage campaign = campaigns[currentCampaignId];
         campaign.owner = _owner;
         campaign.title = _title;
         campaign.description = _description;
@@ -38,20 +53,70 @@ contract CrowdFunding {
         campaign.image = _image;
         campaign.amountCollected = 0;
 
-        numberOfCampaigns++;
-        return numberOfCampaigns;
+        return currentCampaignId;
     }
 
     function donateToCampaign(uint256 _id) public payable {
+        require(
+            msg.value > 0,
+            "You must send some Ether to donate to the campaign"
+        );
+        require(
+            campaigns[_id].deadline > block.timestamp,
+            "The campaign is over"
+        );
+
         uint256 amount = msg.value;
-        Campaign storage campaign = campaigns[_id - 1];
+        Campaign storage campaign = campaigns[_id];
         campaign.donators.push(msg.sender);
         campaign.donations.push(amount);
-
-        // (bool success,)=payable(campaign.owner).call{value:amount}("");
         campaign.amountCollected += amount;
     }
 
+    function withdraw(uint256 _id) public {
+        Campaign storage campaign = campaigns[_id];
+        require(
+            campaign.amountCollected >= campaign.target,
+            "The campaign has not reached its target"
+        );
+        require(
+            campaign.deadline < block.timestamp,
+            "The campaign is still ongoing"
+        );
+        require(
+            campaign.owner == msg.sender,
+            "You are not the owner of the campaign"
+        );
+        payable(msg.sender).transfer(campaign.amountCollected);
+    }
+
+    function refund(uint256 campaignId) public {
+
+        Campaign storage campaign = campaigns[campaignId];
+        require(
+            campaign.amountCollected < campaign.target,
+            "The campaign has reached its target"
+        );
+        require(
+            campaign.deadline < block.timestamp,
+            "The campaign is still ongoing"
+        );
+        uint256 campaignDonatorsLength = campaign.donators.length;
+        for (uint256 i = 0; i < campaignDonatorsLength; i++) {
+            if (campaign.donators[i] == msg.sender) {
+                require(
+                    campaign.donations[i] > 0,
+                    "You have already been refunded"
+                );
+                campaign.donations[i] = 0;
+                payable(msg.sender).transfer(campaign.donations[i]);
+                break;
+            }
+        }
+
+    }
+
+    // getter functions
     function getDonators(
         uint256 _id
     ) public view returns (address[] memory, uint256[] memory) {
@@ -59,6 +124,7 @@ contract CrowdFunding {
     }
 
     function getCampaigns() public view returns (Campaign[] memory) {
+        uint256 numberOfCampaigns = campaignCounter.current() - 1;
         Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
 
         for (uint i = 0; i < numberOfCampaigns; i++) {
