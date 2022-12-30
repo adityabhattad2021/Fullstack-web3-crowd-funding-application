@@ -18,22 +18,22 @@ function CampaignDetails() {
 	const remainingDays = daysLeft(state.deadline);
 
 	async function handleDonate() {
-        setIsLoading(true)
-        await donate(state.camapignId,amount)
-        setIsLoading(false)
-    }
+		setIsLoading(true);
+		await donate(state.camapignId, amount);
+		setIsLoading(false);
+	}
 
-    async function fetchDonators(){
-        console.log(state);
-        const data = await getDonations(state.camapignId);
-        setDonators(data)
-    }
+	async function fetchDonators() {
+		console.log(state);
+		const data = await getDonations(state.camapignId);
+		setDonators(data);
+	}
 
-    useEffect(()=>{
-        if(contract){
-            fetchDonators()
-        }
-    },[contract,address])
+	useEffect(() => {
+		if (contract) {
+			fetchDonators();
+		}
+	}, [contract, address]);
 
 	return (
 		<>
