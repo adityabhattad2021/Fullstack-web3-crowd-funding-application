@@ -4,7 +4,12 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract CrowdFunding {
+
     using Counters for Counters.Counter;
+
+    event CampaignCreated(
+        uint256 indexed campaignId
+    );
 
     struct Campaign {
         address owner;
@@ -21,14 +26,14 @@ contract CrowdFunding {
     mapping(uint256 => Campaign) public campaigns;
     Counters.Counter public campaignCounter;
 
-    function createCampaigns(
+    function createCampaign(
         address _owner,
         string memory _title,
         string memory _description,
         uint256 _target,
         uint256 _deadline,
         string memory _image
-    ) public returns (uint256) {
+    ) public {
         require(
             _deadline > block.timestamp,
             "The deadline should be a date in the future"
@@ -53,7 +58,7 @@ contract CrowdFunding {
         campaign.image = _image;
         campaign.amountCollected = 0;
 
-        return currentCampaignId;
+        emit CampaignCreated(currentCampaignId);
     }
 
     function donateToCampaign(uint256 _id) public payable {
@@ -91,7 +96,6 @@ contract CrowdFunding {
     }
 
     function refund(uint256 campaignId) public {
-
         Campaign storage campaign = campaigns[campaignId];
         require(
             campaign.amountCollected < campaign.target,
@@ -113,7 +117,6 @@ contract CrowdFunding {
                 break;
             }
         }
-
     }
 
     // getter functions
@@ -133,4 +136,11 @@ contract CrowdFunding {
         }
         return allCampaigns;
     }
+
+    function getCampaign(uint256 camapignId) public view returns(Campaign memory){
+        require(camapignId<=campaignCounter.current(),"Campaign does not exist");
+        return campaigns[camapignId];
+    }
+
+    
 }

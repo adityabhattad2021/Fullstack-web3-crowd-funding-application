@@ -1,3 +1,4 @@
+require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL;
@@ -14,7 +15,7 @@ module.exports = {
 			},
 		},
 	},
-	defaultNetwork: "goerli",
+	defaultNetwork: "hardhat",
 	networks: {
 		hardhat: {
 			chainId: 1337,
