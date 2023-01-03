@@ -9,7 +9,7 @@ function Profile() {
 
 	const { address, getCampaigns } = useStateContext();
 	const { contract } = useContract(
-		"0x7f569Bd5fF6b3a5d261630CEB9623c976f5d0076"
+		"0x615C68c3F69b495D0B14F4163770162D31E94C9b"
 	);
 
 	async function fetchCampaigns() {

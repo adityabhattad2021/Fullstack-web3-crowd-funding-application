@@ -15,7 +15,8 @@ module.exports = {
 			},
 		},
 	},
-	defaultNetwork: "hardhat",
+	// While testing change the default network to hardhat
+	defaultNetwork: "goerli",
 	networks: {
 		hardhat: {
 			chainId: 1337,
