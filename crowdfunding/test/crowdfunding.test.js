@@ -1,11 +1,10 @@
 const { assert, expect } = require("chai");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
-const { ethers } = require("hardhat");
-const { boolean } = require("hardhat/internal/core/params/argumentTypes");
+const { ethers, network } = require("hardhat");
 
 describe("Crowd Funding Contract test scenario", async function () {
 	async function deployCrowdFundingFixture() {
-		const [deployer,user1] = await ethers.getSigners();
+		const [deployer, user1] = await ethers.getSigners();
 		const crowdFundingContractFactory = await ethers.getContractFactory(
 			"CrowdFunding"
 		);
@@ -53,7 +52,7 @@ describe("Crowd Funding Contract test scenario", async function () {
 				defaultAccount = fixture.deployer.address;
 				defaultTitle = "Campaign title";
 				defaultDescription = "Campaign description";
-				defaultTarget = ethers.utils.parseEther("2");
+				defaultTarget = ethers.utils.parseEther("1");
 				defaultDeadline =
 					(await ethers.provider.getBlock("latest")).timestamp +
 					86400; // 1 day in the future
@@ -101,30 +100,79 @@ describe("Crowd Funding Contract test scenario", async function () {
 					"image does not match"
 				);
 			});
-			it("Assign donation correctly",async function(){
-
-				const campaignId=1;
-				const amountToDonate="2";
-				const transectionResponse=await fixture.crowdFundingContract.connect(fixture.user1).donateToCampaign(campaignId,{value:ethers.utils.parseEther(amountToDonate)})
-				await transectionResponse.wait(1)
+			it("Assign donation correctly", async function () {
+				const campaignId = 1;
+				const amountToDonate = "2";
+				const transectionResponse = await fixture.crowdFundingContract
+					.connect(fixture.user1)
+					.donateToCampaign(campaignId, {
+						value: ethers.utils.parseEther(amountToDonate),
+					});
+				await transectionResponse.wait(1);
 
 				const campaign = await fixture.crowdFundingContract.getCampaign(
 					campaignId
 				);
 
 				// console.log(parseInt(campaign.donations[0]),campaign.donators);
-				const donations=campaign.donations;
-				const donators=campaign.donators;
-				let donatorFound=0;
-				for(let x=0;x<donations.length;x++){
-					if(donators[x]==fixture.user1.address){
-						donatorFound=1;
-						assert.equal(parseInt(donations[x]),ethers.utils.parseEther(amountToDonate),"donation amount does not match");
+				const donations = campaign.donations;
+				const donators = campaign.donators;
+				let donatorFound = 0;
+				for (let x = 0; x < donations.length; x++) {
+					if (donators[x] == fixture.user1.address) {
+						donatorFound = 1;
+						assert.equal(
+							parseInt(donations[x]),
+							ethers.utils.parseEther(amountToDonate),
+							"donation amount does not match"
+						);
 					}
 				}
-				assert.isTrue(Boolean(donatorFound),"donator not found");
+				assert.isTrue(Boolean(donatorFound), "donator not found");
+			});
+			it("Withdraws funds properly", async function () {
+				const campaignId = 1;
+				const amountToDonate = "2";
+				const transectionResponse = await fixture.crowdFundingContract
+					.connect(fixture.user1)
+					.donateToCampaign(campaignId, {
+						value: ethers.utils.parseEther(amountToDonate),
+					});
+				await transectionResponse.wait(1);
+				const campaignBefore =
+					await fixture.crowdFundingContract.getCampaign(campaignId);
+				assert.equal(
+					parseInt(campaignBefore.amountCollected),
+					ethers.utils.parseEther(amountToDonate),
+					"balance is not correct"
+				);
 
-			})
+				await network.provider.send("evm_increaseTime", [90000]); // 1 day + 1 hour
+				await network.provider.send("evm_mine");
+
+				const creatorBalanceBefore = await ethers.provider.getBalance(
+					fixture.deployer.address
+				);
+				const withdrawResponse = await fixture.crowdFundingContract
+					.connect(fixture.deployer)
+					.withdraw(campaignId);
+				await withdrawResponse.wait(1);
+				const campaignAfter =
+					await fixture.crowdFundingContract.getCampaign(campaignId);
+				const creatorBalanceAfter = await ethers.provider.getBalance(
+					fixture.deployer.address
+				);
+
+				assert.isTrue(
+					parseInt(creatorBalanceAfter) > parseInt(creatorBalanceBefore),
+					"creator balance is not increased"
+				);
+				assert.equal(
+					parseInt(campaignAfter.amountCollected),
+					0,
+					"balance is not zero"
+				);
+			});
 		});
 	});
 });

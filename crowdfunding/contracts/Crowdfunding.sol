@@ -3,6 +3,8 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+error CrowdFunding__WithdrawFailed();
+
 contract CrowdFunding {
 
     using Counters for Counters.Counter;
@@ -99,7 +101,13 @@ contract CrowdFunding {
             campaign.owner == msg.sender,
             "You are not the owner of the campaign"
         );
-        payable(msg.sender).transfer(campaign.amountCollected);
+        uint256 toPay = campaign.amountCollected;
+        campaign.amountCollected = 0;
+        (bool success, ) = payable(msg.sender).call{value: toPay}("");
+        if(!success) {
+            campaign.amountCollected = toPay;
+            revert CrowdFunding__WithdrawFailed();
+        }
     }
 
     function refund(uint256 _id) public {
