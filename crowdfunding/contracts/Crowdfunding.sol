@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "hardhat/console.sol";
 
 error CrowdFunding__WithdrawFailed();
 error CrowdFunding__RefundFailed();
@@ -151,13 +152,17 @@ contract CrowdFunding {
     }
 
     function getCampaigns() public view returns (Campaign[] memory) {
-        uint256 numberOfCampaigns = campaignCounter.current() - 1;
+        uint256 numberOfCampaigns = campaignCounter.current();
         Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
 
-        for (uint i = 0; i < numberOfCampaigns; i++) {
+        for (uint i = 1; i <= numberOfCampaigns;) {
             Campaign memory item = campaigns[i];
-            allCampaigns[i] = item;
+            allCampaigns[i-1] = item;
+            unchecked {
+                i++;
+            }
         }
+        console.log("all campaign length is %d", allCampaigns.length);
         return allCampaigns;
     }
 

@@ -164,7 +164,8 @@ describe("Crowd Funding Contract test scenario", async function () {
 				);
 
 				assert.isTrue(
-					parseInt(creatorBalanceAfter) > parseInt(creatorBalanceBefore),
+					parseInt(creatorBalanceAfter) >
+						parseInt(creatorBalanceBefore),
 					"creator balance is not increased"
 				);
 				assert.equal(
@@ -201,8 +202,38 @@ describe("Crowd Funding Contract test scenario", async function () {
 					parseInt(userBalanceAfter) > parseInt(userBalanceBefore),
 					"user balance is not increased"
 				);
-				
-			})
+			});
+			it("Returns created campaigns correctly", async function () {
+				const anotherCampaignCreator = fixture.user1.address;
+				const anotherCampaignTitle = "Another Campaign";
+				const anotherCampaignDescription =
+					"Another Campaign Description";
+				const anotherCampaignTarget = ethers.utils.parseEther("1");
+				const anotherCamapignDeadline =
+					(await ethers.provider.getBlock("latest")).timestamp +
+					86400; // 1 day in the future
+				const anotherCampaignImage = "http://example.com/image.jpg";
+				const newTx = await fixture.crowdFundingContract
+					.connect(fixture.user1)
+					.createCampaign(
+						anotherCampaignCreator,
+						anotherCampaignTitle,
+						anotherCampaignDescription,
+						anotherCampaignTarget,
+						anotherCamapignDeadline,
+						anotherCampaignImage
+					);
+				await newTx.wait(1);
+
+				const allCampaigns =
+					await fixture.crowdFundingContract.getCampaigns();
+
+				assert.equal(
+					allCampaigns.length,
+					2,
+					"campaigns length does not match"
+				);
+			});
 		});
 	});
 });
