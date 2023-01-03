@@ -173,6 +173,36 @@ describe("Crowd Funding Contract test scenario", async function () {
 					"balance is not zero"
 				);
 			});
+			it("Refunds funds properly", async function () {
+				const campaignId = 1;
+				const amountToDonate = "0.5";
+				const transectionResponse = await fixture.crowdFundingContract
+					.connect(fixture.user1)
+					.donateToCampaign(campaignId, {
+						value: ethers.utils.parseEther(amountToDonate),
+					});
+				await transectionResponse.wait(1);
+
+				await network.provider.send("evm_increaseTime", [90000]); // 1 day + 1 hour
+				await network.provider.send("evm_mine");
+
+				const userBalanceBefore = await ethers.provider.getBalance(
+					fixture.user1.address
+				);
+				const refundResponse = await fixture.crowdFundingContract
+					.connect(fixture.user1)
+					.refund(campaignId);
+				await refundResponse.wait(1);
+				const userBalanceAfter = await ethers.provider.getBalance(
+					fixture.user1.address
+				);
+
+				assert.isTrue(
+					parseInt(userBalanceAfter) > parseInt(userBalanceBefore),
+					"user balance is not increased"
+				);
+				
+			})
 		});
 	});
 });

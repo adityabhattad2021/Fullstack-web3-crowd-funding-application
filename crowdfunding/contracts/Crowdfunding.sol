@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 error CrowdFunding__WithdrawFailed();
+error CrowdFunding__RefundFailed();
 
 contract CrowdFunding {
 
@@ -69,6 +70,7 @@ contract CrowdFunding {
     }
 
     function donateToCampaign(uint256 _id) public payable {
+        require(_id > 0 && _id <= campaignCounter.current(), "Campaign does not exist");
         require(
             msg.value > 0,
             "You must send some Ether to donate to the campaign"
@@ -88,6 +90,7 @@ contract CrowdFunding {
     }
 
     function withdraw(uint256 _id) public {
+        require(_id > 0 && _id <= campaignCounter.current(), "Campaign does not exist");
         Campaign storage campaign = campaigns[_id];
         require(
             campaign.amountCollected >= campaign.target,
@@ -111,6 +114,7 @@ contract CrowdFunding {
     }
 
     function refund(uint256 _id) public {
+        require(_id > 0 && _id <= campaignCounter.current(), "Campaign does not exist");
         Campaign storage campaign = campaigns[_id];
         require(
             campaign.amountCollected < campaign.target,
@@ -127,8 +131,13 @@ contract CrowdFunding {
                     campaign.donations[i] > 0,
                     "You have already been refunded"
                 );
+                uint256 toPay = campaign.donations[i];
                 campaign.donations[i] = 0;
-                payable(msg.sender).transfer(campaign.donations[i]);
+                (bool success, ) = payable(msg.sender).call{value: toPay}("");
+                if(!success) {
+                    campaign.donations[i] = toPay;
+                    revert CrowdFunding__RefundFailed();
+                }
                 break;
             }
         }
