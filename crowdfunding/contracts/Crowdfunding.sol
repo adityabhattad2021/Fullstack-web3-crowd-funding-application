@@ -10,6 +10,11 @@ contract CrowdFunding {
     event CampaignCreated(
         uint256 indexed campaignId
     );
+    event CampaignFunded(
+        uint256 indexed campaignId,
+        address indexed funder,
+        uint256 amount
+    );
 
     struct Campaign {
         address owner;
@@ -76,6 +81,8 @@ contract CrowdFunding {
         campaign.donators.push(msg.sender);
         campaign.donations.push(amount);
         campaign.amountCollected += amount;
+
+        emit CampaignFunded(_id, msg.sender, amount);
     }
 
     function withdraw(uint256 _id) public {
@@ -95,8 +102,8 @@ contract CrowdFunding {
         payable(msg.sender).transfer(campaign.amountCollected);
     }
 
-    function refund(uint256 campaignId) public {
-        Campaign storage campaign = campaigns[campaignId];
+    function refund(uint256 _id) public {
+        Campaign storage campaign = campaigns[_id];
         require(
             campaign.amountCollected < campaign.target,
             "The campaign has reached its target"

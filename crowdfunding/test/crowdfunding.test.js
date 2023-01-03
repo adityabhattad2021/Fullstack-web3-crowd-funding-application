@@ -1,15 +1,17 @@
 const { assert, expect } = require("chai");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { ethers } = require("hardhat");
+const { boolean } = require("hardhat/internal/core/params/argumentTypes");
 
 describe("Crowd Funding Contract test scenario", async function () {
 	async function deployCrowdFundingFixture() {
-		const [deployer] = await ethers.getSigners();
+		const [deployer,user1] = await ethers.getSigners();
 		const crowdFundingContractFactory = await ethers.getContractFactory(
 			"CrowdFunding"
 		);
 		const crowdFundingContract = await crowdFundingContractFactory.deploy();
 		return {
+			user1,
 			deployer,
 			crowdFundingContract,
 		};
@@ -99,6 +101,30 @@ describe("Crowd Funding Contract test scenario", async function () {
 					"image does not match"
 				);
 			});
+			it("Assign donation correctly",async function(){
+
+				const campaignId=1;
+				const amountToDonate="2";
+				const transectionResponse=await fixture.crowdFundingContract.connect(fixture.user1).donateToCampaign(campaignId,{value:ethers.utils.parseEther(amountToDonate)})
+				await transectionResponse.wait(1)
+
+				const campaign = await fixture.crowdFundingContract.getCampaign(
+					campaignId
+				);
+
+				// console.log(parseInt(campaign.donations[0]),campaign.donators);
+				const donations=campaign.donations;
+				const donators=campaign.donators;
+				let donatorFound=0;
+				for(let x=0;x<donations.length;x++){
+					if(donators[x]==fixture.user1.address){
+						donatorFound=1;
+						assert.equal(parseInt(donations[x]),ethers.utils.parseEther(amountToDonate),"donation amount does not match");
+					}
+				}
+				assert.isTrue(Boolean(donatorFound),"donator not found");
+
+			})
 		});
 	});
 });
