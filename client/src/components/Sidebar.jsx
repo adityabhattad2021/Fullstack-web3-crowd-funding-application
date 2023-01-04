@@ -31,7 +31,7 @@ function Icon({ styles, name, imageURL, isActive, disabled, handeClick }) {
 
 function Sidebar() {
 	const navigate = useNavigate();
-	const [isActive, setIsActive] = useState("dashboard");
+	const [isActive, setIsActive] = useState();
 
 	return (
 		<div className="flex justify-between items-center flex-col sticky top-5 h-[93vh]">

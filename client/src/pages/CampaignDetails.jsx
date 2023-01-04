@@ -9,9 +9,9 @@ import { crowdFund, loader } from "../assets";
 
 function CampaignDetails() {
 	const { state } = useLocation();
-	const { donate, getDonations, contract, address,getCampaign } = useStateContext();
-	const [campaign,setCampaign]=useState({})
-
+	const { donate, getDonations, contract, address, getCampaign } =
+		useStateContext();
+	const [campaign, setCampaign] = useState({});
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [amount, setAmount] = useState("");
@@ -32,12 +32,10 @@ function CampaignDetails() {
 		setDonators(data);
 	}
 
-	async function fetchCampaign(){
-		const data=await getCampaign(state.campaignId);
+	async function fetchCampaign() {
+		const data = await getCampaign(state.campaignId);
 		setCampaign(data);
 	}
-
-
 
 	useEffect(() => {
 		if (contract) {
@@ -102,7 +100,7 @@ function CampaignDetails() {
 										<img
 											src={crowdFund}
 											alt="user"
-											className="w-[60%] h-[60%] object-contain"
+											className="w-[100%] h-[100%] object-contain"
 										/>
 									</div>
 									<div>
