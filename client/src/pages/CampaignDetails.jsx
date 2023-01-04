@@ -19,13 +19,13 @@ function CampaignDetails() {
 
 	async function handleDonate() {
 		setIsLoading(true);
-		await donate(state.camapignId, amount);
+		await donate(state.campaignId, amount);
 		setIsLoading(false);
 	}
 
 	async function fetchDonators() {
 		console.log(state);
-		const data = await getDonations(state.camapignId);
+		const data = await getDonations(state.campaignId);
 		setDonators(data);
 	}
 

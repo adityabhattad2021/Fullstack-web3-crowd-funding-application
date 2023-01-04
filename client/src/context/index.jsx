@@ -4,6 +4,7 @@ import {
 	useContract,
 	useMetamask,
 	useContractWrite,
+	useContractRead
 } from "@thirdweb-dev/react";
 import { ethers } from "ethers";
 
@@ -18,10 +19,17 @@ export function StateContextProvider({ children }) {
 		contract,
 		"createCampaign"
 	);
+	const { mutateAsync: donateToCampaign } = useContractWrite(
+		contract,
+		"donateToCampaign"
+	);
+	const { mutateAsync: withdraw } = useContractWrite(contract, "withdraw");
+	const { mutateAsync: refund } = useContractWrite(contract, "refund");
 
 	const address = useAddress();
 	const connect = useMetamask();
 
+	// Transection calls
 	async function publishCampaign(form) {
 		try {
 			const data = await createCampaign([
@@ -41,8 +49,47 @@ export function StateContextProvider({ children }) {
 		}
 	}
 
+	async function donate(campaignId, amount) {
+		// console.log((ethers.utils.parseEther(amount)).toString());
+		let data = null;
+		try {
+			data = await donateToCampaign([campaignId], {
+				value: ethers.utils.parseEther(amount).toString(),
+			});
+		} catch (error) {
+			console.log("Contract call failed: ", error);
+		}
+		// const data=await contract.call('donateToCampaign',(campaignId+1).toString(),{ value: (ethers.utils.parseEther(amount)).toString() });
+
+		return data;
+	}
+
+	async function withdraw(campaignId) {
+		let data = null;
+		try {
+			data = await withdraw([campaignId]);
+			console.log("contract call success: ", data);
+		} catch (error) {
+			console.log("Contract call failed: ", error);
+		}
+		return data;
+	}
+
+	async function refund(camapignId) {
+		let data = null;
+		try {
+			data = await refund([camapignId]);
+			console.info("contract call successs", data);
+		} catch (err) {
+			console.error("contract call failure", err);
+		}
+		return data;
+	}
+
+
+	// Read functions
 	async function getCampaigns() {
-		const campaigns = await contract.call("getCampaigns");
+		const { data:campaigns } = useContractRead(contract, "getCampaigns")
 		const parsedCampaigns = campaigns.map((campaign, index) => {
 			return {
 				owner: campaign.owner,
@@ -54,39 +101,33 @@ export function StateContextProvider({ children }) {
 					campaign.amountCollected.toString()
 				),
 				image: campaign.image,
-				camapignId: index,
+				campaignId: campaign.campaignId,
 			};
 		});
 		console.log(parsedCampaigns);
 		return parsedCampaigns;
 	}
 
+	async function getUserCampaigns() {
+		const allCampaigns = await getCampaigns();
 
-	async function getUserCampaigns(){
-		const allCampaigns=await getCampaigns()
+		const filteredCampaigns = allCampaigns.filter(
+			(campaign) => campaign.owner === address
+		);
 
-		const filteredCampaigns=allCampaigns.filter((campaign)=>(campaign.owner===address))
-
-		return filteredCampaigns
+		return filteredCampaigns;
 	}
 
-	async function donate(campaignId,amount){
-		console.log((ethers.utils.parseEther(amount)).toString());
-		const data=await contract.call('donateToCampaign',(campaignId+1).toString(),{ value: (ethers.utils.parseEther(amount)).toString() });
+	async function getDonations(campaignId) {
+		const { data:donations } = useContractRead(contract, "getDonators", campaignId)
+		const numberofDonations = donations[0].length;
+		const parsedDonations = [];
 
-		return data;
-	}
-
-	async function getDonations(campaignId){
-		const donations=await contract.call("getDonators",campaignId)
-		const numberofDonations=donations[0].length;
-		const parsedDonations=[]
-
-		for(let i=0;i<numberofDonations;i++){
+		for (let i = 0; i < numberofDonations; i++) {
 			parsedDonations.push({
-				donator:donations[0][i],
-				doantions:ethers.utils.formatEther(donations[1][i].toString())
-			})
+				donator: donations[0][i],
+				doantions: ethers.utils.formatEther(donations[1][i].toString()),
+			});
 		}
 
 		return parsedDonations;
@@ -102,7 +143,9 @@ export function StateContextProvider({ children }) {
 				getUserCampaigns,
 				publishCampaign,
 				donate,
-				getDonations
+				withdraw,
+				refund,
+				getDonations,
 			}}
 		>
 			{children}

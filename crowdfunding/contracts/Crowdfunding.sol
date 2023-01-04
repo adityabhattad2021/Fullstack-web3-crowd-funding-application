@@ -22,6 +22,7 @@ contract CrowdFunding {
 
     struct Campaign {
         address owner;
+        uint256 campaignId;
         string title;
         string description;
         uint256 target;
@@ -59,6 +60,7 @@ contract CrowdFunding {
         campaignCounter.increment();
         uint256 currentCampaignId = campaignCounter.current();
         Campaign storage campaign = campaigns[currentCampaignId];
+        campaign.campaignId=currentCampaignId;
         campaign.owner = _owner;
         campaign.title = _title;
         campaign.description = _description;
