@@ -7,10 +7,8 @@ function Profile() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [campaigns, setCampaigns] = useState([]);
 
-	const { address, getCampaigns } = useStateContext();
-	const { contract } = useContract(
-		"0x615C68c3F69b495D0B14F4163770162D31E94C9b"
-	);
+	const { address, getCampaigns,contract } = useStateContext();
+
 
 	async function fetchCampaigns() {
 		setIsLoading(true);

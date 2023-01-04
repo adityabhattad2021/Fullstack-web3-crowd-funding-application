@@ -168,9 +168,9 @@ contract CrowdFunding {
         return allCampaigns;
     }
 
-    function getCampaign(uint256 camapignId) public view returns(Campaign memory){
-        require(camapignId<=campaignCounter.current(),"Campaign does not exist");
-        return campaigns[camapignId];
+    function getCampaign(uint256 campignId) public view returns(Campaign memory){
+        require(campignId<=campaignCounter.current(),"Campaign does not exist");
+        return campaigns[campignId];
     }
 
     

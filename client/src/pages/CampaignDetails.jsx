@@ -9,13 +9,17 @@ import { crowdFund, loader } from "../assets";
 
 function CampaignDetails() {
 	const { state } = useLocation();
-	const { donate, getDonations, contract, address } = useStateContext();
+	const { donate, getDonations, contract, address,getCampaign } = useStateContext();
+	const [campaign,setCampaign]=useState({})
+
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [amount, setAmount] = useState("");
 	const [donators, setDonators] = useState([]);
 
 	const remainingDays = daysLeft(state.deadline);
+
+	// console.log(state);
 
 	async function handleDonate() {
 		setIsLoading(true);
@@ -24,14 +28,21 @@ function CampaignDetails() {
 	}
 
 	async function fetchDonators() {
-		console.log(state);
 		const data = await getDonations(state.campaignId);
 		setDonators(data);
 	}
 
+	async function fetchCampaign(){
+		const data=await getCampaign(state.campaignId);
+		setCampaign(data);
+	}
+
+
+
 	useEffect(() => {
 		if (contract) {
 			fetchDonators();
+			fetchCampaign();
 		}
 	}, [contract, address]);
 
@@ -60,8 +71,8 @@ function CampaignDetails() {
 									className="absolute h-full bg-[#4acd8d]"
 									style={{
 										width: `${calculateBarPercentage(
-											state.target,
-											state.amountCollected
+											campaign.target,
+											campaign.amountCollected
 										)}%`,
 										maxWidth: "100%",
 									}}
