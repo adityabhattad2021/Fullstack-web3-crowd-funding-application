@@ -6,7 +6,7 @@ import { CustomButton } from "./";
 import { logo, menu, search, crowdFund } from "../assets";
 import { navLinks } from "../constants";
 
-function Navbar() {
+function Navbar({searchTerm,setSearchTerm}) {
 	// // Temporary
 	// const address = "0x12j1nn2o123j12nb12k3h13kln1n2k3j12o31l23";
 
@@ -14,6 +14,7 @@ function Navbar() {
 	const { address, connect } = useStateContext();
 	const [isActive, setIsActive] = useState("dashboard");
 	const [toggleDrawer, setToggleDrawer] = useState(false);
+	
 
 	return (
 		<div className="flex md:flex-row flex-col-reverse justify-between mb-[35px] gap-6">
@@ -21,6 +22,9 @@ function Navbar() {
 				<input
 					type="text"
 					placeholder="Search for Campaigns"
+					onChange={e=>setSearchTerm(e.target.value)}
+					value={searchTerm}
+					onFocus={()=>navigate('/search')}
 					className="flex w-full font-epilogue font-normal text-[14px] placeholder:text-[#4b5264] text-white bg-transparent outline-none"
 				/>
 				<div className="w-[72px] h-full rounded-[20px] bg-[#4acd8d] flex justify-center items-center cursor-pointer">

@@ -130,6 +130,17 @@ export function StateContextProvider({ children }) {
 		return filteredCampaigns;
 	}
 
+	async function getSearchedCampaigns(searchTerm){
+		const allCampaigns=await getCampaigns();
+		if(searchTerm==""){
+			return allCampaigns;
+		}
+		const filteredCampaigns=allCampaigns.filter(
+			(campaign)=>(campaign.title).includes(searchTerm)
+		)
+		return filteredCampaigns;
+	}
+
 	async function getDonations(campaignId) {
 		const donations = await contract.call("getDonators", campaignId);
 		const numberofDonations = donations[0].length;
@@ -153,6 +164,7 @@ export function StateContextProvider({ children }) {
 				connect,
 				getCampaigns,
 				getUserCampaigns,
+				getSearchedCampaigns,
 				publishCampaign,
 				donate,
 				withdrawETH,

@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import { DisplayCampaigns } from "../components";
 import { useStateContext } from "../context";
 
-function Profile() {
+function Search({searchTerm}) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [campaigns, setCampaigns] = useState([]);
 
-	const { address, getUserCampaigns,contract } = useStateContext();
+	const { address, getSearchedCampaigns,contract } = useStateContext();
 
 
 	async function fetchCampaigns() {
 		setIsLoading(true);
-		const data = await getUserCampaigns();
+		const data = await getSearchedCampaigns(searchTerm);
 		setCampaigns(data);
 		setIsLoading(false);
 	}
@@ -22,15 +22,15 @@ function Profile() {
         }else{
             console.log("contract is not connected");
         }
-    },[address,contract])
+    },[searchTerm,contract,address])
 
 	return (
         <DisplayCampaigns
-            title="Campaigns created by you"
+            title="Campaigns"
             isLoading={isLoading}
             campaigns={campaigns}
         />
     );
 }
 
-export default Profile;
+export default Search;
