@@ -11,7 +11,17 @@ const chainId = ChainId.Goerli;
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
-	<ThirdwebProvider desiredChainId={chainId}>
+	<ThirdwebProvider
+		desiredChainId={chainId}
+		sdkOptions={{
+			gasless: {
+				biconomy: {
+					apiKey: import.meta.env.VITE_BICONOMY_KEY,
+					apiId: import.meta.env.VITE_BICONOMY_ID,
+				},
+			},
+		}}
+	>
 		<BrowserRouter>
 			<StateContextProvider>
 				<App />
