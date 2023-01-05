@@ -2,7 +2,7 @@
 
 # Test on Goerli Testnet
 To test this contract on the Goerli testnet, you can use the following contract address:
-`0x615C68c3F69b495D0B14F4163770162D31E94C9b`
+`0x2234AEdC22B178029B61647af8f31baF919A9d64`
 
 # Functions
 
