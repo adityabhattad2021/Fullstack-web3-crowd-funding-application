@@ -6,12 +6,13 @@ import {
 	CampaignDetails,
 	WithdrawFunds,
 	Search,
+	RefundFunds,
 } from "./pages";
 import { Sidebar, Navbar } from "./components";
 import { useState } from "react";
 
 function App() {
-	const [searchTerm,setSearchTerm]=useState("")
+	const [searchTerm, setSearchTerm] = useState("");
 	return (
 		<div className="relative sm:-8 p-4 bg-[#13131a] min-h-screen flex flex-row">
 			<div className="sm:flex hidden mr-10 relative">
@@ -31,7 +32,12 @@ function App() {
 						element={<CampaignDetails />}
 					/>
 					<Route path="/withdraw" element={<WithdrawFunds />} />
-					<Route path="/search" element={<Search searchTerm={searchTerm} />}/>
+					<Route path="/refund" element={<RefundFunds/>} />
+					<Route
+						path="/search"
+						element={<Search searchTerm={searchTerm} />}
+					/>
+
 				</Routes>
 			</div>
 		</div>

@@ -4,3 +4,4 @@ export { default as Search } from "./Search";
 export { default as CreateCampaign } from "./CreateCampaign";
 export { default as CampaignDetails } from "./CampaignDetails";
 export { default as WithdrawFunds } from "./WithdrawFunds";
+export { default as RefundFunds } from "./Refund";
